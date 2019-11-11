@@ -14,7 +14,7 @@
           <span>我已阅读并同意用户协议和隐私条款</span>
         </el-form-item>
         <el-form-item>
-          <el-button @click="submitForm('loginFormRef')" type="primary" style="width: 100%">登录</el-button>
+          <el-button @click="submitForm('loginFormRef')" :loading="isloading" type="primary" style="width: 100%">登录</el-button>
         </el-form-item>
       </el-form>
     </div>
@@ -22,7 +22,18 @@
 </template>
 
 <script type="text/javascript">
+import '@/assets/js/gt.js'
 export default {
+  created () {
+    // let that = this
+    document.onkeypress = e => {
+      var keycode = document.all ? event.keyCode : e.which
+      if (keycode === 13) {
+        this.submitForm('loginFormRef') // 登录方法名
+        return false
+      }
+    }
+  },
   data () {
     // 自定义检测协议规则
     var xieyiRule = function (rule, value, callback) {
@@ -30,6 +41,8 @@ export default {
       value ? callback() : callback(new Error('请仔细阅读并同意本协议'))
     }
     return {
+      isloading: false, // 用于判断是否显示加载中按钮
+      geetObj: '', // 用于记录人机交互缓存
       // loginForm 记录表单的所有数据
       // 内部的属性表示每个input框的值
       loginForm: {
@@ -59,27 +72,63 @@ export default {
       this.$refs[loginFormRef].validate(valid => {
         if (valid) {
           // this.$router.push({ name: 'home' })
-          var promise = this.$html.post('/authorizations', this.loginForm)
-          promise
-            .then(result => {
-              // console.log(result)
-              console.log(this)
-              if (result.status === 201) {
-                this.$router.push('/home')
-                let userinfo = result.data.data
-                localStorage.setItem('userinfo', JSON.stringify(userinfo))
-              }
-            })
-            .catch(() => {
-              // console.log(err)
-              console.log(this)
-              return this.$message({
-                message: '错了哦，账号或者密码错误呦',
-                duration: 1000 // 控制错误弹框提示时间
+          if (this.geetObj) {
+            return this.geetObj.verify()
+          }
+          this.isloading = true
+          let pro = this.$html.get(`/captchas/${this.loginForm.mobile}`)
+          pro
+            .then((result) => {
+              console.log(result)
+              let { data } = result.data
+              window.initGeetest({
+                // 以下配置参数来自服务端 SDK
+                gt: data.gt,
+                challenge: data.challenge,
+                offline: !data.success,
+                new_captcha: true,
+                product: 'bind'
+              }, captchaObj => {
+                captchaObj.onReady(() => {
+                  // 验证码ready之后才能调用verify方法显示验证码
+                  captchaObj.verify()
+                  this.geetObj = captchaObj
+                  this.isloading = false
+                }).onSuccess(() => {
+                  // your code
+                  this.login()
+                }).onError(() => {
+                  // your code
+                })
               })
+              // this.login()
+            })
+            .catch((err) => {
+              return this.$message.error('获得人机秘钥信息有错误：' + err)
             })
         }
       })
+    },
+    login () {
+      var promise = this.$html.post('/authorizations', this.loginForm)
+      promise
+        .then(result => {
+          // console.log(result)
+          // console.log(this)
+          if (result.status === 201) {
+            this.$router.push('/home')
+            let userinfo = result.data.data
+            localStorage.setItem('userinfo', JSON.stringify(userinfo))
+          }
+        })
+        .catch(() => {
+          // console.log(err)
+          // console.log(this)
+          return this.$message({
+            message: '错了哦，账号或者密码错误呦',
+            duration: 1000 // 控制错误弹框提示时间
+          })
+        })
     }
   }
 }
