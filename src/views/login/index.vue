@@ -14,7 +14,7 @@
           <span>我已阅读并同意用户协议和隐私条款</span>
         </el-form-item>
         <el-form-item>
-          <el-button @click="submitForm('loginFormRef')" :loading="isloading" type="primary" style="width: 100%">登录</el-button>
+          <el-button @click="login('loginFormRef')" :loading="isloading" type="primary" style="width: 100%">登录</el-button>
         </el-form-item>
       </el-form>
     </div>
@@ -42,7 +42,7 @@ export default {
     }
     return {
       isloading: false, // 用于判断是否显示加载中按钮
-      geetObj: '', // 用于记录人机交互缓存
+      geetObj: null, // 用于记录人机交互缓存
       // loginForm 记录表单的所有数据
       // 内部的属性表示每个input框的值
       loginForm: {
@@ -67,19 +67,19 @@ export default {
   },
   components: {},
   methods: {
-    submitForm (loginFormRef) {
+    login (loginFormRef) {
       // console.log(this)
-      this.$refs[loginFormRef].validate(valid => {
+      this.$refs.loginFormRef.validate(valid => {
         if (valid) {
           // this.$router.push({ name: 'home' })
-          if (this.geetObj) {
+          if (this.geetObj !== null) {
             return this.geetObj.verify()
           }
           this.isloading = true
           let pro = this.$html.get(`/captchas/${this.loginForm.mobile}`)
           pro
             .then((result) => {
-              console.log(result)
+              // console.log(result)
               let { data } = result.data
               window.initGeetest({
                 // 以下配置参数来自服务端 SDK
@@ -96,7 +96,7 @@ export default {
                   this.isloading = false
                 }).onSuccess(() => {
                   // your code
-                  this.login()
+                  this.loginAct()
                 }).onError(() => {
                   // your code
                 })
@@ -109,16 +109,16 @@ export default {
         }
       })
     },
-    login () {
-      var promise = this.$html.post('/authorizations', this.loginForm)
-      promise
+    loginAct () {
+      let pro = this.$html.post('/authorizations', this.loginForm)
+      pro
         .then(result => {
-          // console.log(result)
+          console.log(result)
           // console.log(this)
-          if (result.status === 201) {
-            this.$router.push('/home')
+          if (result.data.message === 'OK') {
+            this.$router.push({ name: 'home' })
             let userinfo = result.data.data
-            localStorage.setItem('userinfo', JSON.stringify(userinfo))
+            sessionStorage.setItem('userinfo', JSON.stringify(userinfo))
           }
         })
         .catch(() => {
