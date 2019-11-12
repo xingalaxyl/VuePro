@@ -1,10 +1,50 @@
 <template>
   <el-container>
-    <el-aside width="200px">Aside</el-aside>
+    <!-- 左侧菜单栏 -->
+    <el-aside :width="isCollapse ? '65px' : '200px'">
+      <img src="@/assets/img/logo_admin.png" alt style="width: 170px; margin: 10px 15px 10px 15px" />
+      <el-menu
+        default-active="2"
+        class="el-menu-vertical-demo"
+        background-color="#323745"
+        text-color="#fff"
+        active-text-color="#ffd04b"
+        :collapse="isCollapse"
+        :collapse-transition="false"
+        :style="{width: isCollapse ? '65px' : '200px'}"
+      >
+        <el-menu-item index="1">
+          <i class="el-icon-location"></i>
+          <span slot="title">首页</span>
+        </el-menu-item>
+        <el-submenu index="2">
+          <template slot="title">
+            <i class="el-icon-menu"></i>
+            <span>内容管理</span>
+          </template>
+          <el-menu-item index="2-1">发布文章</el-menu-item>
+          <el-menu-item index="2-2">文章列表</el-menu-item>
+          <el-menu-item index="2-3">评论列表</el-menu-item>
+          <el-menu-item index="2-4">素材管理</el-menu-item>
+        </el-submenu>
+        <el-menu-item index="3">
+          <i class="el-icon-location"></i>
+          <span slot="title">粉丝管理</span>
+        </el-menu-item>
+        <el-menu-item index="4">
+          <i class="el-icon-location"></i>
+          <span slot="title">账户信息</span>
+        </el-menu-item>
+      </el-menu>
+    </el-aside>
     <el-container>
       <el-header>
         <div class="fl">
-          <i class="el-icon-s-fold"></i>
+          <i
+            :class="isCollapse ? 'el-icon-s-unfold' : 'el-icon-s-fold'"
+            @click="isCollapse = !isCollapse"
+            style="margin-right: 10px"
+          ></i>
           <span>江苏传智播客教育科技股份有限公司</span>
         </div>
         <div class="fr">
@@ -23,7 +63,9 @@
           </el-dropdown>
         </div>
       </el-header>
-      <el-main>Main</el-main>
+      <el-main>
+        <router-view></router-view>
+      </el-main>
     </el-container>
   </el-container>
 </template>
@@ -39,7 +81,9 @@ export default {
     }
   },
   data () {
-    return {}
+    return {
+      isCollapse: false // 是否折叠
+    }
   },
   components: {},
   methods: {
@@ -49,23 +93,23 @@ export default {
         confirmButtonText: '确定',
         cancelButtonText: '取消',
         type: 'warning'
-      }).then(() => {
-        window.sessionStorage.clear()
-        this.$router.push('/login')
-      }).catch(() => {
-
       })
+        .then(() => {
+          window.sessionStorage.clear()
+          this.$router.push('/login')
+        })
+        .catch(() => {})
     }
   }
 }
 </script>
 <style lang="less">
 .fr {
-      .el-input {
-        .el-input__inner {
-          height: 32px;
-        }
-      }
+  .el-input {
+    .el-input__inner {
+      height: 32px;
+    }
+  }
 }
 </style>
 <style lang="less" scoped>
@@ -79,6 +123,7 @@ export default {
   .el-header {
     // height: 60px;
     // width: 100%;
+    min-width: 970px;
     background-color: pink;
     display: flex;
     justify-content: space-between;

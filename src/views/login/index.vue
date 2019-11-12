@@ -116,9 +116,11 @@ export default {
           console.log(result)
           // console.log(this)
           if (result.data.message === 'OK') {
-            this.$router.push({ name: 'home' })
             let userinfo = result.data.data
             sessionStorage.setItem('userinfo', JSON.stringify(userinfo))
+
+            console.log(userinfo)
+            this.$router.push({ name: 'home' })
           }
         })
         .catch(() => {
