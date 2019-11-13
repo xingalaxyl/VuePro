@@ -4,6 +4,7 @@
     <el-aside :width="isCollapse ? '65px' : '200px'">
       <img src="@/assets/img/logo_admin.png" alt style="width: 170px; margin: 10px 15px 10px 15px" />
       <el-menu
+        router
         default-active="2"
         class="el-menu-vertical-demo"
         background-color="#323745"
@@ -23,7 +24,7 @@
             <span>内容管理</span>
           </template>
           <el-menu-item index="2-1">发布文章</el-menu-item>
-          <el-menu-item index="2-2">文章列表</el-menu-item>
+          <el-menu-item index="/article">文章列表</el-menu-item>
           <el-menu-item index="2-3">评论列表</el-menu-item>
           <el-menu-item index="2-4">素材管理</el-menu-item>
         </el-submenu>
@@ -113,6 +114,9 @@ export default {
 }
 </style>
 <style lang="less" scoped>
+body {
+  background-color: #F2F3F5;
+}
 .el-container {
   height: 100%;
   // 左侧导航栏
@@ -124,7 +128,7 @@ export default {
     // height: 60px;
     // width: 100%;
     min-width: 970px;
-    background-color: pink;
+    // background-color: pink;
     display: flex;
     justify-content: space-between;
     font-size: 16px;
