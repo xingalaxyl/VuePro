@@ -46,7 +46,7 @@ export default {
       // loginForm 记录表单的所有数据
       // 内部的属性表示每个input框的值
       loginForm: {
-        mobile: '13911111111',
+        mobile: '13455552222',
         code: '246810',
         xieyi: true
       },
