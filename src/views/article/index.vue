@@ -7,7 +7,7 @@
       <div>
         <el-form ref="searchFormRef" :model="searchForm" label-width="100px">
           <el-form-item label="文章状态:">
-            <el-radio-group v-model="searchForm.status" @change="getarticleList()">
+            <el-radio-group v-model="searchForm.status">
               <el-radio label>全部</el-radio>
               <el-radio label="0">草稿</el-radio>
               <el-radio label="1">待审核</el-radio>
@@ -17,14 +17,7 @@
             </el-radio-group>
           </el-form-item>
           <el-form-item label="频道列表:">
-            <el-select v-model="searchForm.channel_id" clearable placeholder="请选择" @change="getarticleList()">
-              <el-option
-                v-for="item in channelList"
-                :key="item.id"
-                :label="item.name"
-                :value="item.id"
-              ></el-option>
-            </el-select>
+            <channel-com @slt="selectHandler"></channel-com>
           </el-form-item>
           <el-form-item label="时间选择:">
             <div class="block">
@@ -70,7 +63,7 @@
           <el-table-column prop="pubdate" label="时间"></el-table-column>
           <el-table-column label="操作">
             <template slot-scope="stData">
-              <el-button type="primary" size="mini">修改</el-button>
+              <el-button type="primary" size="mini" @click="$router.push(`/articleedit/${stData.row.id}`)">修改</el-button>
               <el-button type="danger" size="mini" @click="del(stData.row.id)">删除</el-button>
             </template>
           </el-table-column>
@@ -92,10 +85,12 @@
 </template>
 
 <script type="text/javascript">
+// 引入频道列表组件
+import ChannelCom from '@/components/channel.vue'
 export default {
   name: 'ArticleList', // 组件名称
   created () {
-    this.getChannelList() // 调用获取频道信息
+    // this.getChannelList() // 调用获取频道信息
     this.getarticleList() // 调用获取文章信息
   },
   // 定义监听器
@@ -109,13 +104,13 @@ export default {
         this.searchForm.end_pubdate = ''
       }
       this.getarticleList()
+    },
+    searchForm: {
+      handler: function (val, oldVal) {
+        this.getarticleList()
+      },
+      deep: true
     }
-    // searchForm: {
-    //   handler: function (val, oldVal) {
-    //     this.getarticleList()
-    //   },
-    //   deep: true
-    // }
   },
   data () {
     return {
@@ -133,21 +128,12 @@ export default {
       }
     }
   },
-  components: {},
+  components: {
+    ChannelCom
+  },
   methods: {
-    // 获取频道列表
-    getChannelList () {
-      let pro = this.$html.get('/channels')
-      pro
-        .then(result => {
-          console.log(result)
-          if (result.data.message === 'OK') {
-            this.channelList = result.data.data.channels
-          }
-        })
-        .catch(err => {
-          return this.$message(new Error('获取频道错误') + err)
-        })
+    selectHandler (val) {
+      this.searchForm.channel_id = val
     },
     // 获取文章列表
     getarticleList () {
@@ -160,7 +146,7 @@ export default {
       let pro = this.$html.get('/articles', { params: searchData })
       pro
         .then(result => {
-          console.log(result)
+          // console.log(result)
           if (result.data.message === 'OK') {
             this.articleList = result.data.data.results
             this.tot_count = result.data.data.total_count
@@ -172,11 +158,11 @@ export default {
     },
     handleSizeChange (val) {
       this.searchForm.per_page = val
-      this.getarticleList()
+      // this.getarticleList()
     },
     handleCurrentChange (val) {
       this.searchForm.page = val
-      this.getarticleList()
+      // this.getarticleList()
     },
 
     // 删除文章
